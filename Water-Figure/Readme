@@ -1,0 +1,20 @@
+=== Template Fluids Simulation ===
+
+-- Compiling the code --
+
+This code works on Linux et MacOSX. A few modifications are necessary for Windows.
+It needs :
+ OpenGL3 
+ libSDL
+
+* Compile Fluids :
+ cd ./src
+ make
+
+
+-- Running the simulation
+
+* Run Fluids
+ cd ./src
+ ./Fluids
+
