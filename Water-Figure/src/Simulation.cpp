@@ -218,9 +218,9 @@ void Simulation::initSamples()
 				
 				if (iX==(nbSamplesX)/2)
 					forces[index*4+1]=1.0f;
-					/*
-				if (iX % ((nbSamplesX)/4) == 0 )
-					forces[index*4+1]=-0.1f;*/
+					
+				//if (iX % ((nbSamplesX)/4) == 0 )
+				//	forces[index*4+1]=-0.1f;
 
 				// Pressures
 				pressures[index*4+0]=1.0;
@@ -229,11 +229,11 @@ void Simulation::initSamples()
 				pressures[index*4+3]=1.0;
 
 				// Types
-				types[index*4]=0;/*
-				if(iY == (nbSamplesY - 1) )
-				{
-					types[index*4]=1;
-				}*/
+				types[index]=0;
+				//if(iY == (nbSamplesY - 1) )
+				//{
+				//	types[index]=1;
+				//}
 	        }
 	    }
 	}

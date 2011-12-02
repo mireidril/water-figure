@@ -37,6 +37,7 @@ Application::~Application()
 void Application::init()
 {
     this->scene=NULL;
+    this->simulation = NULL;
     
     // False as long as we don't want to quit the application
     this->done=false;
@@ -593,10 +594,13 @@ void Application::loop()
     {
         while (SDL_PollEvent(&event))
             handleEvent(event);
-            
-        this->simulation->update();
-    	this->simulation->render();
-        renderFrame();
+           
+        if(this->simulation != NULL)
+        {
+		    this->simulation->update();
+			this->simulation->render();
+		}
+		renderFrame();
     }    
         
 }
