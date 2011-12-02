@@ -3,7 +3,7 @@
 // N. Dommanget dommange@univ-mlv.fr
 
 
-#version 150
+//#version 150
 
 
 struct Material
