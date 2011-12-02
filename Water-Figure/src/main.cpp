@@ -111,6 +111,8 @@ int main(int argc, char **argv)
     GLuint nbSamplesOneDir=10; 
     GLuint nbSamplesX=nbSamplesOneDir; 
     GLuint nbSamplesY=nbSamplesOneDir;
+    // Proportion de l'écran
+    nbSamplesY=nbSamplesOneDir*application->height/application->width; 
     GLuint nbSamplesZ=nbSamplesOneDir;
     GLuint nbParticlesCoef=2; // On surface, nbSamples*4^nbParticlesCoefs particles //particles density
                               // In volume,  nbSamples*6^nbParticlesCoefs particles

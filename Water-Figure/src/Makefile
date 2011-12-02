@@ -55,6 +55,6 @@ clean::
 	rm -f *.o *~ *.d *.oD 
 
 bigclean : clean
-	rm -f $(EXE) $(LIB)
+	rm -f $(EXE)
 	rm -f ../plugins/*.so
 	rm -f ../videos/*.mp4

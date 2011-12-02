@@ -76,7 +76,12 @@ Simulation::Simulation(Scene * scene, bool surface=true, GLfloat size=2.0, GLflo
         // Cell side length (square or cubes)
     this->h=size/float(nbSamplesX);
         // Start point left/bottom/back of the grid
-    this->offset[0]=-size/2.0f; this->offset[1]=-size/2.0f; this->offset[2]=-size/2.0f;
+    //this->offset[0]=-size/2.0f; this->offset[1]=-size/2.0f; this->offset[2]=-size/2.0f; OLD
+    // Start point left/bottom/back of the grid
+	this->offset[0]=-size/2.0;
+	this->offset[1]=-size*(GLfloat(nbSamplesY)/GLfloat(nbSamplesX))/2.0;
+	this->offset[2]=-size*(GLfloat(nbSamplesZ)/GLfloat(nbSamplesX))/2.0;
+
     if (surface) this->offset[2]=size/2.0f;
         // Offset from left/bottom/back of grid cell
     this->offsetInCell=this->h/2.0f;
@@ -161,6 +166,14 @@ Simulation::~Simulation()
     delete [] particles;
     delete [] particleColors;
     delete [] particleVelocities;
+}
+
+// Sets integer indices of the cell position pos overlaps
+// 3D not implemented
+void Simulation::getCell(GLfloat * pos, int * iX, int * iY, int * iZ)
+{
+	(*iX)=int(floor((pos[0]-offset[0])/h));
+	(*iY)=int(floor((pos[1]-offset[1])/h));
 }
 
 
@@ -297,29 +310,44 @@ void Simulation::initParticles()
     GLfloat halfCell=h/2.0f;
     GLfloat step=h/float(nbAxis);
     GLfloat sideOffsetX=h/(4.0f*nbAxis);
-    
-    // Inits 4 particles in 2D cells (optimal distribution)
-    // if (nbParticlesCoef==1) : corners of a losange in the square cell
-    // if (nbParticlesCoef==2) : twice as more ...
+    	
+	GLuint iParticles=0;
+	GLfloat * particlesTmp=new GLfloat[this->nbParticles*4]; //new
+	// Inits 4 particles in 2D cells (optimal distribution)
+	// if (nbParticlesCoef==1) : corners of a losange in the square cell
+	// if (nbParticlesCoef==2) : twice as more ...
 	for (GLuint iSamples=0 ; iSamples<nbSamples ; iSamples++)
 	{
-	    for (GLuint iY=0 ; iY<nbAxis ; iY++)
-	    {
-	        GLfloat offsetY=-halfCell + step/2.0f + iY*step;
-	        for (GLuint iX=0 ; iX<nbAxis ; iX++)
-	        {
-	            GLfloat offsetX=-halfCell + sideOffsetX + iX*step;
-	            if (iY%2==1) offsetX+=step/2.0f;
-	            
-                GLuint iParticles=iSamples*nb+(nbAxis*iY+iX);
-	            particles[iParticles*4+0]=samples[iSamples*4+0]+offsetX;
-	            particles[iParticles*4+1]=samples[iSamples*4+1]+offsetY;
-	            particles[iParticles*4+2]=samples[iSamples*4+2];
-	            particles[iParticles*4+3]=samples[iSamples*4+3];
-	        }
-	    }
+		if (types[iSamples]==0)
+		{
+			for (GLuint iY=0 ; iY<nbAxis ; iY++)
+			{
+				GLfloat offsetY=-halfCell + step/2.0 + iY*step;
+				for (GLuint iX=0 ; iX<nbAxis ; iX++)
+				{
+					GLfloat offsetX=-halfCell + sideOffsetX + iX*step;
+					if (iY%2==1) offsetX+=step/2.0;
+					particlesTmp[iParticles*4+0]=samples[iSamples*4+0]+offsetX;
+					particlesTmp[iParticles*4+1]=samples[iSamples*4+1]+offsetY;
+					particlesTmp[iParticles*4+2]=samples[iSamples*4+2];
+					particlesTmp[iParticles*4+3]=samples[iSamples*4+3];
+					iParticles++;
+				}
+			}
+		}
 	}
+	nbParticles=iParticles;
+	delete [] particles;
+	delete [] particleColors;
+	delete [] particleVelocities;
+	this->particles=new GLfloat[this->nbParticles*4];
+	this->particleColors=new GLfloat[this->nbParticles*4];
+	this->particleVelocities=new GLfloat[this->nbParticles*4*2];
 	
+	for (GLuint iParticlesCoord=0 ; iParticlesCoord<4*this->nbParticles ; iParticlesCoord++)
+		this->particles[iParticlesCoord]=particlesTmp[iParticlesCoord];
+		
+	delete [] particlesTmp;
 	for (GLuint iParticles=0 ; iParticles<this->nbParticles ; iParticles++)
 	{
 	    // Moves particles randomly and at close range around initial position
@@ -428,6 +456,8 @@ void Simulation::buildSamples(Object * object)
     glBindBuffer(GL_ARRAY_BUFFER, objectSamples->colorsVboId);
     glBufferData(GL_ARRAY_BUFFER, objectSamples->nbVertices*4*sizeof(GLfloat), colors, GL_DYNAMIC_DRAW);
 }
+
+
 
 
 // Builds an object to visualize the velocity components as colors (at borders)
@@ -721,8 +751,9 @@ void Simulation::drawParticlesVelocities()
 // 3D not implemented
 void Simulation::interpolateFromCenters(GLfloat * data, GLfloat * position, GLfloat * result)
 {
-    GLfloat xCorner=(position[0]+size/2.0f)/h;
-    GLfloat yCorner=(position[1]+size/2.0f)/h;
+    GLfloat xCorner=(position[0]-offset[0])/h;
+	GLfloat yCorner=(position[1]-offset[1])/h;
+
     if ((xCorner<0.0f) || (xCorner>nbSamplesX) || (yCorner<0.0f) || (yCorner>nbSamplesY))
         return;
         
@@ -756,8 +787,9 @@ void Simulation::interpolateFromCenters(GLfloat * data, GLfloat * position, GLfl
 // 3D not implemented
 void Simulation::interpolateFromBorders(GLfloat * dataX, GLfloat * dataY, GLfloat * dataZ, GLfloat * position, GLfloat * result)
 {
-    GLfloat xCorner=(position[0]+size/2.0f)/h;
-    GLfloat yCorner=(position[1]+size/2.0f)/h;
+    GLfloat xCorner=(position[0]-offset[0])/h;
+	GLfloat yCorner=(position[1]-offset[1])/h;
+
     if ((xCorner<0.0f) || (xCorner>nbSamplesX) || (yCorner<0.0f) || (yCorner>nbSamplesY))
         return;
 
@@ -986,6 +1018,157 @@ void Simulation::advectColors(GLfloat dt)
 }
 
 
+/// Capitalization : update velocities from centers from the centeredVel.
+void Simulation::updateVelocitiesFromCenters(GLfloat * centeredVel)
+{
+	// Resets velocities components to 0
+	for (GLuint iBordersX=0 ; iBordersX<nbBordersX ; iBordersX++)
+		velocitiesX[iBordersX]=0.0;
+	for (GLuint iBordersY=0 ; iBordersY<nbBordersY ; iBordersY++)
+		velocitiesY[iBordersY]=0.0;
+	// Uses the new centers velocity to update the separated velocity components
+	for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+	{
+		for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+		{
+			GLuint iSamples=iY*nbSamplesX+iX;
+			GLuint indexVelocitiesXLeft =iY *(nbSamplesX+1)+ iX;
+			GLuint indexVelocitiesXRight =iY *(nbSamplesX+1)+(iX+1);
+			GLuint indexVelocitiesYBottom=iY * nbSamplesX + iX;
+			GLuint indexVelocitiesYTop =(iY+1) * nbSamplesX + iX;
+			GLfloat coefLeft=0.5;
+			GLfloat coefRight=0.5;
+			GLfloat coefBottom=0.5;
+			GLfloat coefTop=0.5;
+			if (iX==0) coefLeft =1.0;
+			if (iX==(nbSamplesX-1)) coefRight =1.0;
+			if (iY==0) coefBottom=1.0;
+			if (iY==(nbSamplesY-1)) coefTop =1.0;
+			velocitiesX[indexVelocitiesXLeft] +=coefLeft *centeredVel[iSamples*4+0];
+			velocitiesX[indexVelocitiesXRight] +=coefRight *centeredVel[iSamples*4+0];
+			velocitiesY[indexVelocitiesYBottom]+=coefBottom*centeredVel[iSamples*4+1];
+			velocitiesY[indexVelocitiesYTop] +=coefTop *centeredVel[iSamples*4+1];
+		}
+	}
+	enforceVelocitiesBorders();
+	// Updates the corresponding data if stored on GPU
+	if (objectVelocitiesCenters!=NULL)
+	{
+		GLfloat vertices[nbSamples*4*2];
+		for (GLuint iSamples=0 ; iSamples<nbSamples ; iSamples++)
+		{
+			for (GLuint iCoord=0 ; iCoord<4 ; iCoord++)
+			{
+			vertices[(iSamples*2+0)*4+iCoord]=samples[iSamples*4+iCoord];
+			vertices[(iSamples*2+1)*4+iCoord]=samples[iSamples*4+iCoord]-centeredVel[iSamples*4+iCoord]*vectorScale;
+			}
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesCenters->vboId);
+		glBufferData(GL_ARRAY_BUFFER, objectVelocitiesCenters->nbVertices*4*sizeof(GLfloat), vertices, GL_DYNAMIC_DRAW);
+	}
+	if (objectVelocitiesBorders!=NULL)
+	{
+		GLfloat colors[objectVelocitiesBorders->nbVertices*4];
+		GLuint iBorders=0;
+		for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+		{
+			for (GLuint iX=0 ; iX<(nbSamplesX+1) ; iX++)
+			{
+			GLfloat normVelocityX=velocitiesX[iY*(nbSamplesX+1)+iX];
+			// if (normVelocityX<0.0) normVelocityX=-normVelocityX;
+			colors[iBorders*4+0]=normVelocityX;
+			colors[iBorders*4+1]=0.0;
+			colors[iBorders*4+2]=-normVelocityX;
+			colors[iBorders*4+3]=1.0;
+			iBorders++;
+			}
+		}
+		for (GLuint iY=0 ; iY<(nbSamplesY+1) ; iY++)
+		{
+			for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+			{
+			GLfloat normVelocityY=velocitiesY[iY*nbSamplesX+iX];
+			//if (normVelocityY<0.0) normVelocityY=-normVelocityY;
+			colors[iBorders*4+0]=0.0;
+			colors[iBorders*4+1]=normVelocityY;
+			colors[iBorders*4+2]=-normVelocityY;
+			colors[iBorders*4+3]=1.0;
+			iBorders++;
+			}
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesBorders->colorsVboId);
+		glBufferData(GL_ARRAY_BUFFER, objectVelocitiesBorders->nbVertices*4*sizeof(GLfloat), colors, GL_DYNAMIC_DRAW);
+	}
+}
+
+
+void Simulation::updateVelocitiesFromBorders()
+{
+	if (objectVelocitiesCenters!=NULL)
+	{
+		GLfloat vertices[nbSamples*4*2];
+		for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+		{
+			for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+			{
+				GLuint iSamples=iY*nbSamplesX+iX;
+				GLfloat sampleVelocity[]={0.0, 0.0, 0.0, 0.0};
+				// Interpolates the velocity at cell center (sampleVelocity)
+				GLuint indexVelocitiesXLeft =iY *(nbSamplesX+1)+ iX;
+				GLuint indexVelocitiesXRight =iY *(nbSamplesX+1)+(iX+1);
+				GLuint indexVelocitiesYBottom=iY * nbSamplesX + iX;
+				GLuint indexVelocitiesYTop =(iY+1) * nbSamplesX + iX;
+				sampleVelocity[0]=(velocitiesX[indexVelocitiesXLeft]
+				+velocitiesX[indexVelocitiesXRight])/2.0;
+				sampleVelocity[1]=(velocitiesY[indexVelocitiesYBottom]
+				+velocitiesY[indexVelocitiesYTop])/2.0;
+				for (GLuint iCoord=0 ; iCoord<4 ; iCoord++)
+				{
+					vertices[(iSamples*2+0)*4+iCoord]=samples[iSamples*4+iCoord];
+					vertices[(iSamples*2+1)*4+iCoord]=samples[iSamples*4+iCoord]-sampleVelocity[iCoord]*vectorScale;
+				}
+			}
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesCenters->vboId);
+		glBufferData(GL_ARRAY_BUFFER, objectVelocitiesCenters->nbVertices*4*sizeof(GLfloat), vertices, GL_DYNAMIC_DRAW);
+	}
+	if (objectVelocitiesBorders!=NULL)
+	{
+		GLfloat colors[objectVelocitiesBorders->nbVertices*4];
+		GLuint iBorders=0;
+		for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+		{
+			for (GLuint iX=0 ; iX<(nbSamplesX+1) ; iX++)
+			{
+			GLfloat normVelocityX=velocitiesX[iY*(nbSamplesX+1)+iX];
+			if (normVelocityX<0.0) normVelocityX=-normVelocityX;
+			colors[iBorders*4+0]=normVelocityX*10.0;//new
+			colors[iBorders*4+1]=0.0;
+			colors[iBorders*4+2]=0.0;
+			colors[iBorders*4+3]=1.0;
+			iBorders++;
+			}
+		}
+		for (GLuint iY=0 ; iY<(nbSamplesY+1) ; iY++)
+		{
+			for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+			{
+				GLfloat normVelocityY=velocitiesY[iY*nbSamplesX+iX];
+				if (normVelocityY<0.0) normVelocityY=-normVelocityY;
+				colors[iBorders*4+0]=0.0;
+				colors[iBorders*4+1]=normVelocityY*10.0;//new
+				colors[iBorders*4+2]=0.0;
+				colors[iBorders*4+3]=1.0;
+				iBorders++;
+			}
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesBorders->colorsVboId);
+		glBufferData(GL_ARRAY_BUFFER, objectVelocitiesBorders->nbVertices*4*sizeof(GLfloat), colors, GL_DYNAMIC_DRAW);
+	}
+}
+
+
+
 // Modifies the velocity samples so that velocity derivative is null (particles moving through the grid keep their velocity)
 // 3D not implemented
 // Semi-Lagrangian advection : 1 - interpolates velocity at center, 
@@ -1030,114 +1213,7 @@ void Simulation::advectVelocities(GLfloat dt)
 		}
 	}
 	
-	//mise à zero nbBordeX, nbBordes Y
-	for (GLuint iX = 0; iX < nbBordersX; ++iX)
-	{
-		velocitiesX[iX] = 0.0;
-	}
-	for (GLuint iY = 0; iY < nbBordersY; ++iY)
-	{
-		velocitiesY[iY] = 0.0;
-	}
-	for (GLuint iZ = 0; iZ < nbBordersZ; ++iZ)
-	{
-		velocitiesZ[iZ] = 0.0;
-	}
-	
-	// remplissage des velocity
-	for (GLuint iY = 0; iY < nbSamplesY; ++iY)
-	{
-		for (GLuint iX = 0; iX < nbSamplesX; ++iX)
-		{
-			GLuint indexSampleXLeft = iY * (nbSamplesX +1) + iX;
-			GLuint indexSampleXRight = iY * (nbSamplesX +1) + iX +1;
-			GLuint indexSampleYBottom = iY * nbSamplesX + iX;
-			GLuint indexSampleYTop = (iY+1) * nbSamplesX + iX;
-		
-			GLfloat coefLeft = 0.5, coefRight = 0.5, coefBottom = 0.5, coefTop = 0.5;
-			if(iX == 0) coefLeft = 1.0;
-			if(iX == nbSamplesX - 1) coefRight = 1.0;
-			if(iY == 0) coefBottom = 1.0;
-			if(iY == nbSamplesY - 1) coefTop = 1.0;
-		
-			GLuint iSample = iY * nbSamplesX + iX;
-			velocitiesX[indexSampleXLeft] += coefLeft * newVelocities[iSample*4 + 0]; 
-			velocitiesX[indexSampleXRight] += coefRight * newVelocities[iSample*4 + 0]; 
-			velocitiesY[indexSampleYBottom] += coefBottom * newVelocities[iSample*4 + 1]; 
-			velocitiesY[indexSampleYTop] += coefTop * newVelocities[iSample*4 + 1];
-		}
-	}
-		
-	//si y'a les murs
-	/*if(solidWalls)
-	{
-		for (GLuint iY = 0; iY < nbSamplesY; ++iY)
-			for (GLuint iX = 0; iX < nbSamplesX+1; ++iX)
-				if( iX == 0 || iX == nbSamplesX)
-					velocitiesX[iY * (nbSamplesX+1) + iX] = 0.0;
-				
-		for (GLuint iY = 0; iY < nbSamplesY +1 ; ++iY)
-			for (GLuint iX = 0; iX < nbSamplesX; ++iX)
-				if( iY == 0 || iY == nbSamplesY)
-					velocitiesY[iY * (nbSamplesX) + iX] = 0.0;
-	}*/
-	enforceVelocitiesBorders();
-	
-	if(objectVelocitiesCenters != NULL)
-	{
-		GLfloat * vertices = new GLfloat[nbSamples * 4 * 2];
-		for (GLuint iSamples = 0; iSamples < nbSamples; ++iSamples)
-		{
-			for (GLuint iCoord = 0; iCoord < 4; ++iCoord)
-			{
-				vertices[(iSamples*2 + 0) * 4 + iCoord] = samples[iSamples * 4 + iCoord];
-				vertices[(iSamples*2 + 1) * 4 + iCoord] = samples[iSamples * 4 + iCoord] - newVelocities[iSamples * 4 + iCoord] * vectorScale;
-			}
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesCenters->vboId);
-    	glBufferData(GL_ARRAY_BUFFER, objectVelocitiesCenters->nbVertices*4*sizeof(GLfloat), vertices, GL_DYNAMIC_DRAW);
-	}
-	
-	if(objectVelocitiesBorders != NULL)
-	{
-		GLfloat * colors = new GLfloat[objectVelocitiesBorders->nbVertices * 4];
-		GLuint iBorders = 0;
-		for (GLuint iY = 0; iY < nbSamplesY; ++iY)
-		{
-			for (GLuint iX = 0; iX < nbSamplesX + 1; ++iX)
-			{
-				GLfloat normVelocityX = velocitiesX[iY * (nbSamplesX + 1) + iX];
-				if(normVelocityX < 0.0)
-				{
-					normVelocityX = -normVelocityX;
-				}
-				colors[(iBorders*4 + 0)] = normVelocityX;
-				colors[(iBorders*4 + 1)] = 0.0;
-				colors[(iBorders*4 + 2)] = 0.0;
-				colors[(iBorders*4 + 3)] = 1.0;
-				iBorders++;
-			}
-		}
-		
-		for (GLuint iY = 0; iY < nbSamplesY +1 ; ++iY)
-		{
-			for (GLuint iX = 0; iX < nbSamplesX; ++iX)
-			{
-				GLfloat normVelocityY = velocitiesY[iY * (nbSamplesX) + iX];
-				if(normVelocityY < 0.0)
-				{
-					normVelocityY = -normVelocityY;
-				}
-				colors[(iBorders*4 + 0)] = 0.0; 
-				colors[(iBorders*4 + 1)] = normVelocityY;
-				colors[(iBorders*4 + 2)] = 0.0;
-				colors[(iBorders*4 + 3)] = 1.0;
-				iBorders++;
-			}
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, objectVelocitiesBorders->colorsVboId);
-    	glBufferData(GL_ARRAY_BUFFER, objectVelocitiesBorders->nbVertices*4*sizeof(GLfloat), colors, GL_DYNAMIC_DRAW);
-	}
+	updateVelocitiesFromCenters(newVelocities);
 }
 
 void Simulation::applyForces(GLfloat dt)
@@ -1166,50 +1242,7 @@ void Simulation::applyForces(GLfloat dt)
 		 }
 	}
 	
-	//Restore velocities components to 0.0
-	for( GLuint iBordersX = 0; iBordersX < nbBordersX; ++iBordersX)
-	{
-		velocitiesX[iBordersX] = 0.0;
-	}
-	for( GLuint iBordersY = 0; iBordersY < nbBordersY; ++iBordersY)
-	{
-		velocitiesY[iBordersY] = 0.0;
-	}
-	
-	for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
-	{
-		for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
-		{
-			if(type(iX, iY, 0) == 0)
-			{
-				GLuint iSamples = iY * nbSamplesX + iX;
-			
-				GLuint indexVelocityXLeft = iY * (nbSamplesX + 1) + iX;
-				GLuint indexVelocityXRight = iY * (nbSamplesX + 1) + iX + 1;
-				GLuint indexVelocityYBottom = iY * nbSamplesX + iX;
-				GLuint indexVelocityYTop = (iY +1 ) * nbSamplesX + iX;
-			
-				GLfloat coefLeft = 0.5, coefRight = 0.5, coefBottom = 0.5, coefTop = 0.5;
-				if(iX == 0) coefLeft = 1.0;
-				if(iX == nbSamplesX - 1) coefRight = 1.0;
-				if(iY == 0) coefBottom = 1.0;
-				if(iY == nbSamplesY - 1) coefTop = 1.0;
-			
-				velocitiesX[indexVelocityXLeft] += coefLeft * newVelocities[iSamples*4 + 0]; 
-				velocitiesX[indexVelocityXRight] += coefRight * newVelocities[iSamples*4 + 0]; 
-				velocitiesY[indexVelocityYBottom] += coefBottom * newVelocities[iSamples*4 + 1]; 
-				velocitiesY[indexVelocityYTop] += coefTop * newVelocities[iSamples*4 + 1];
-			
-				/*if(solidWalls)
-				{
-					if( iX == 0 ) velocitiesX[indexVelocityXLeft] = 0.0;
-					if(iX == nbSamplesX - 1) velocitiesX[indexVelocityXRight] = 0.0;
-					if(iY == 0) velocitiesY[indexVelocityYBottom] = 0.0;
-					if(iY == nbSamplesY - 1) velocitiesY[indexVelocityYTop] = 0.0;
-				}*/
-			}
-		} 
-	}
+	updateVelocitiesFromCenters(newVelocities);
 
 	enforceVelocitiesBorders();
 }
@@ -1331,7 +1364,7 @@ void Simulation::project(GLfloat dt)
 		}	
 	}
 	conjugateGradient(Adiag, Aright, Atop, rhs);
-	
+	updateVelocitiesFromBorders();
 	GLfloat scale = dt / (density * h );
 	for (GLuint iY = 0; iY < nbSamplesY; ++iY)
 	{
@@ -1437,13 +1470,14 @@ void Simulation::conjugateGradient(double * Adiag, double * Aright, double * Ato
     Eigen::VectorXd r(nbSamples);
     for (GLuint iSamples=0 ; iSamples<nbSamples ; iSamples++)
          r[iSamples]=b[iSamples];
+
+	// rInfinityNorm is the maximum of absolute values of r
     double rInfinityNorm=r.lpNorm<Eigen::Infinity>();
     if (rInfinityNorm<=tol)
     {
          for (GLuint iSamples=0 ; iSamples<nbSamples ; iSamples++)
               pressures[iSamples]=(GLfloat)p[iSamples];
-         //std::cout<<”End reached immediately.”<<std::endl;
-         //std::cout<<”r=”<<rInfinityNorm<<std::endl;
+         std::cout<<"Stability reached."<<std::endl;
          return;
     }
     
@@ -1460,7 +1494,7 @@ void Simulation::conjugateGradient(double * Adiag, double * Aright, double * Ato
 	{
 		// Multiply matrix A to s to get z;
 		multiplySparseMatrix(Adiag, Aright, Atop, s, &z);
-		double alpha;
+		double alpha=0;
 		double div=z.dot(s);
 		if (div!=0.0) alpha=sigma/div;
 		p+=alpha*s;
@@ -1473,7 +1507,7 @@ void Simulation::conjugateGradient(double * Adiag, double * Aright, double * Ato
 		else
 		{
 		     applyPreconditioner(Aright, Atop, precon, r, &z);
-		     double beta;
+		     double beta=0;
 		     double newSigma=z.dot(r);
 		     if (sigma!=0.0) beta=newSigma/sigma;
 		     s=z+beta*s;
@@ -1504,7 +1538,7 @@ void Simulation::MICPreconditioner(double * Adiag, double * Aright, double * Ato
             if (iY>0)
             {
                  e-=pow(Atop[iSBottom]*(*precon)[iSBottom], 2)
-                   +tau*(Atop [iSBottom]*Aright[iSLeft]*pow((*precon)[iSBottom], 2));
+                   +tau*(Atop [iSBottom]*Aright[iSBottom]*pow((*precon)[iSBottom], 2));
             }
             if (e<(safetyConstant*Adiag[iS])) e=Adiag[iS];
             if (e!=0.0) (*precon)[iS]=1.0/sqrt(e);

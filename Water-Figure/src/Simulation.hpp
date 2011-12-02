@@ -82,6 +82,8 @@ class Simulation
         Simulation(Scene * scene, bool surface, GLfloat size, GLfloat density, GLfloat viscosity, GLuint nbSamplesX, GLuint nbSamplesY, GLuint nbSamplesZ, GLuint nbParticlesCoef, GLuint defaultShaderID, GLuint spriteShaderID, bool solidWalls);
         ~Simulation();
 
+	void getCell(GLfloat * pos, int * iX, int * iY, int * iZ);
+
         void initSimulation();
         void initVisualization();
         
@@ -96,6 +98,9 @@ class Simulation
         void buildVelocitiesBorders(Object * object);
 		void enforceVelocitiesBorders();
         void drawVelocitiesBorders();
+        
+        void updateVelocitiesFromCenters(GLfloat * centeredVel);
+        void updateVelocitiesFromBorders();
         
         void buildVelocitiesCenters(Object * object);
         void drawVelocitiesCenters();
