@@ -230,10 +230,10 @@ void Simulation::initSamples()
 
 				// Types
 				types[index]=0;
-				//if(iY == (nbSamplesY - 1) )
-				//{
-				//	types[index]=1;
-				//}
+				if(iY == (nbSamplesY - 1) )
+				{
+					types[index]=1;
+				}
 	        }
 	    }
 	}
@@ -1180,31 +1180,34 @@ void Simulation::applyForces(GLfloat dt)
 	{
 		for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
 		{
-			GLuint iSamples = iY * nbSamplesX + iX;
-			
-			GLuint indexVelocityXLeft = iY * (nbSamplesX + 1) + iX;
-			GLuint indexVelocityXRight = iY * (nbSamplesX + 1) + iX + 1;
-			GLuint indexVelocityYBottom = iY * nbSamplesX + iX;
-			GLuint indexVelocityYTop = (iY +1 ) * nbSamplesX + iX;
-			
-			GLfloat coefLeft = 0.5, coefRight = 0.5, coefBottom = 0.5, coefTop = 0.5;
-			if(iX == 0) coefLeft = 1.0;
-			if(iX == nbSamplesX - 1) coefRight = 1.0;
-			if(iY == 0) coefBottom = 1.0;
-			if(iY == nbSamplesY - 1) coefTop = 1.0;
-			
-			velocitiesX[indexVelocityXLeft] += coefLeft * newVelocities[iSamples*4 + 0]; 
-			velocitiesX[indexVelocityXRight] += coefRight * newVelocities[iSamples*4 + 0]; 
-			velocitiesY[indexVelocityYBottom] += coefBottom * newVelocities[iSamples*4 + 1]; 
-			velocitiesY[indexVelocityYTop] += coefTop * newVelocities[iSamples*4 + 1];
-			
-			/*if(solidWalls)
+			if(type(iX, iY, 0) == 0)
 			{
-				if( iX == 0 ) velocitiesX[indexVelocityXLeft] = 0.0;
-				if(iX == nbSamplesX - 1) velocitiesX[indexVelocityXRight] = 0.0;
-				if(iY == 0) velocitiesY[indexVelocityYBottom] = 0.0;
-				if(iY == nbSamplesY - 1) velocitiesY[indexVelocityYTop] = 0.0;
-			}*/
+				GLuint iSamples = iY * nbSamplesX + iX;
+			
+				GLuint indexVelocityXLeft = iY * (nbSamplesX + 1) + iX;
+				GLuint indexVelocityXRight = iY * (nbSamplesX + 1) + iX + 1;
+				GLuint indexVelocityYBottom = iY * nbSamplesX + iX;
+				GLuint indexVelocityYTop = (iY +1 ) * nbSamplesX + iX;
+			
+				GLfloat coefLeft = 0.5, coefRight = 0.5, coefBottom = 0.5, coefTop = 0.5;
+				if(iX == 0) coefLeft = 1.0;
+				if(iX == nbSamplesX - 1) coefRight = 1.0;
+				if(iY == 0) coefBottom = 1.0;
+				if(iY == nbSamplesY - 1) coefTop = 1.0;
+			
+				velocitiesX[indexVelocityXLeft] += coefLeft * newVelocities[iSamples*4 + 0]; 
+				velocitiesX[indexVelocityXRight] += coefRight * newVelocities[iSamples*4 + 0]; 
+				velocitiesY[indexVelocityYBottom] += coefBottom * newVelocities[iSamples*4 + 1]; 
+				velocitiesY[indexVelocityYTop] += coefTop * newVelocities[iSamples*4 + 1];
+			
+				/*if(solidWalls)
+				{
+					if( iX == 0 ) velocitiesX[indexVelocityXLeft] = 0.0;
+					if(iX == nbSamplesX - 1) velocitiesX[indexVelocityXRight] = 0.0;
+					if(iY == 0) velocitiesY[indexVelocityYBottom] = 0.0;
+					if(iY == nbSamplesY - 1) velocitiesY[indexVelocityYTop] = 0.0;
+				}*/
+			}
 		} 
 	}
 
