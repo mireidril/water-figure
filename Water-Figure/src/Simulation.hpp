@@ -14,6 +14,9 @@
 #include "../api/random/MersenneTwister.h"
 #include "../api/eigen-eigen-3.0.3/Eigen/Dense"
 
+// Enum of types of cells
+enum { FLUID, AIR, SOLID };
+
 // Forward declaration
 class Scene;
 class Object;
