@@ -24,7 +24,7 @@ void main()
     if (filledData[2]) uvs = vertexUvs;
     if (filledData[3]) localColor = vertexColor;
 
-    gl_PointSize=15;
+    gl_PointSize=4;
 
     gl_Position = projection * view * model * vertexPosition;
 }

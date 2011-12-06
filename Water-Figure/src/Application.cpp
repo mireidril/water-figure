@@ -367,6 +367,13 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
         	case SDLK_ESCAPE:
           		this->done=true;
           	break;
+          	case SDLK_SPACE:
+          	  /*if(this->simulation != NULL)
+				{
+					this->simulation->update();
+					this->simulation->render();
+				}*/
+			break;
           	
         	case SDLK_c :
           		std::cout<<"Key \"c\" was pressed."<<std::endl;

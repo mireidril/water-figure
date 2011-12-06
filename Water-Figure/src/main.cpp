@@ -108,7 +108,7 @@ int main(int argc, char **argv)
     GLfloat size=2.0;					//largeur de la grille dans l'espace
     float density=1000.0;
     float viscosity=0.0;
-    GLuint nbSamplesOneDir=10; 
+    GLuint nbSamplesOneDir=60; 
     GLuint nbSamplesX=nbSamplesOneDir; 
     GLuint nbSamplesY=nbSamplesOneDir;
     // Proportion de l'écran
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     application->simulation->drawParticles();					// Particules
     //application->simulation->drawParticlesVelocities();		// Vitesse des particules
 	//application->simulation->drawForces();					// Forces appliquées
-	//application->simulation->drawPressures();					// Pressions par carrés
+	application->simulation->drawPressures();					// Pressions par carrés
 	//application->simulation->drawTypes();						// Types des carrés
     
     
