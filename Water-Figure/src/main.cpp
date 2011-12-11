@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     //application->simulation->drawParticlesVelocities();		// Vitesse des particules
 	//application->simulation->drawForces();					// Forces appliquées
 	//application->simulation->drawPressures();					// Pressions par carrés
-	//application->simulation->drawTypes();						// Types des carrés
+	application->simulation->drawTypes();						// Types des carrés
     
     
     //__________________________________________________________________________

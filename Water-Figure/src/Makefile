@@ -30,7 +30,7 @@ COMPILER_FLAGS_WARN=-g -Wall -I.
 EXE=Fluids
 
 INCLUDE= $(SDL_INC) $(OPENGL_INC) -I../api
-LIBS= $(SDL_LIB) $(OPENGL_LIB)
+LIBS= $(SDL_LIB) $(OPENGL_LIB) -L../api/TinyXML -ltinyxml
 
 OBJS = Object.o Builders.o Camera.o Simulation.o Scene.o Application.o Tools.o main.o glew.o
 

@@ -10,6 +10,7 @@
 // Windowing system SDL
 #include <SDL.h>
 
+
 // Forward declaration
 struct Scene;
 struct Simulation;

@@ -13,6 +13,7 @@
 // Mersenne Twister random generation
 #include "../api/random/MersenneTwister.h"
 #include "../api/eigen-eigen-3.0.3/Eigen/Dense"
+#include "../api/TinyXML/tinyxml.h"
 
 // Enum of types of cells
 enum { FLUID, AIR, SOLID };
@@ -145,7 +146,11 @@ class Simulation
 		void applyPreconditioner(double * Aright, double * Atop, Eigen::VectorXd precon, Eigen::VectorXd r, Eigen::VectorXd * z);
 		   
 		void threeColorImageHandler(unsigned char *image);
-		   
+		
+		void loadForcesFrom(const char* pFilename);
+		void parse( TiXmlNode* pParent, unsigned int indent);
+		void applyForcesLoaded( int x, int y, int x2, int y2, double valueX, double valueY );
+		
         void update();
         
         void render();
