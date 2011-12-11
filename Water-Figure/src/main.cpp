@@ -111,9 +111,9 @@ int main(int argc, char **argv)
     GLuint nbSamplesOneDir=80; 
     //GLuint nbSamplesX=nbSamplesOneDir; 
     GLuint nbSamplesX=120;
-    GLuint nbSamplesY=nbSamplesOneDir*application->height/application->width;
+    GLuint nbSamplesY=120;
     // Proportion de l'écran
-    nbSamplesY=nbSamplesOneDir*application->height/application->width; 
+    //nbSamplesY=nbSamplesOneDir*application->height/application->width; 
     GLuint nbSamplesZ=nbSamplesOneDir;
     GLuint nbParticlesCoef=0; // On surface, nbSamples*4^nbParticlesCoefs particles //particles density
                               // In volume,  nbSamples*6^nbParticlesCoefs particles
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     application->simulation->drawParticles();					// Particules
     //application->simulation->drawParticlesVelocities();		// Vitesse des particules
 	//application->simulation->drawForces();					// Forces appliquées
-	application->simulation->drawPressures();					// Pressions par carrés
+	//application->simulation->drawPressures();					// Pressions par carrés
 	//application->simulation->drawTypes();						// Types des carrés
     
     

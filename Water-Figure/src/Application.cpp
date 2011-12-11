@@ -47,8 +47,8 @@ void Application::init()
 	
 	// Times measurements initialisation
 	this->cntFrame=0;
-	uint64_t lastStartTime=0;
-	uint64_t frameDuration=0; 
+	this->lastStartTime=0;
+	this->frameDuration=0; 
 	
     // Move counter
     this->cntMove=0;
@@ -68,6 +68,8 @@ void Application::init()
 	this->yMouseLeftDownPosition=0.0;
 
 	this->scroll=0;
+	
+	this->ppmPhase=1;
 	
 	// Initialisation of SDL and creation of OpenGL context
     initSDLOpenGL();
@@ -399,6 +401,23 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
           		switchMouse();
           	break;
           	
+          	case SDLK_o :
+          		std::cout<<"Key \"o\" was pressed."<<std::endl;
+		      	if(ppmPhase < 5){
+		      		++ ppmPhase;
+					GLuint width;
+					GLuint height;
+					std::string image_path;
+					std::stringstream out;
+					out<<"../ppm/image"<<ppmPhase<<".ppm";
+					image_path = out.str();
+					
+					unsigned char * image_ppm = loadPPM(image_path, &width, &height);
+					std::cout<<"Charging "<<image_path<<std::endl;
+					this->simulation->threeColorImageHandler(image_ppm);
+				}
+			break;
+          	
           	default:
       	    break;
       	}
@@ -574,36 +593,7 @@ void Application::renderFrame()
         this->frameDuration=(time-this->lastStartTime)/20LL;
         this->lastStartTime=time;
     }
-        if(this->cntFrame <= 10){
-        GLuint width;
-        GLuint height;
-        unsigned char * image_ppm = loadPPM("../ppm/image1.ppm", &width, &height);
-        this->simulation->threeColorImageHandler(image_ppm);
-    }
-    else if(this->cntFrame > 10 && this->cntFrame <= 20){
-        GLuint width;
-        GLuint height;
-        unsigned char * image_ppm  = loadPPM("../images/image2.ppm", &width, &height);
-        this->simulation->threeColorImageHandler(image_ppm);
-    }
-        else if(this->cntFrame > 20 && this->cntFrame <= 30){
-			GLuint width;
-			GLuint height;
-			unsigned char * image_ppm  = loadPPM("../images/image3.ppm", &width, &height);
-			this->simulation->threeColorImageHandler(image_ppm);
-    }
-        else if(this->cntFrame > 30 && this->cntFrame <= 40){
-			GLuint width;
-			GLuint height;
-			unsigned char * image_ppm  = loadPPM("../images/image4.ppm", &width, &height);
-			this->simulation->threeColorImageHandler(image_ppm);
-    }
-		else{
-			GLuint width;
-			GLuint height;
-			unsigned char * image_ppm  = loadPPM("../images/image5.ppm", &width, &height);
-			this->simulation->threeColorImageHandler(image_ppm);
-	}
+    
     // Reports any possible glError
     //std::cout<<"renderFrame error"<<std::endl;
     printGlErrors();
