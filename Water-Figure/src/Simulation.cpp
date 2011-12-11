@@ -13,6 +13,34 @@
 #include <math.h>
 
 
+//-------------------------------------
+//--------PPM interpretation-----------
+//-------------------------------------
+/*Types (0 : cell is fluid, 1 : cell is empty, 2 : cell is solid)*/
+
+void Simulation::threeColorImageHandler(unsigned char *image)
+{
+
+    for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+      {
+        for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+        {
+            GLuint iSample = (iY*(nbSamplesX)+ iX);
+            GLuint iImage = (iY*(nbSamplesX)+ iX)*3;
+            if((image[iImage] == 0)&& (image[iImage+1] == 0) && (image[iImage+2] == 0) ){
+                types[iSample] = SOLID;
+            }
+            else if((image[iImage] == 1)&& (image[iImage+1] == 1) && (image[iImage+2] == 1) ){
+                types[iSample] = 1;
+            }
+            else {
+                types[iSample] = FLUID;
+
+            }
+        }
+    }
+}
+
 // Constructor
 Simulation::Simulation(Scene * scene, bool surface=true, GLfloat size=2.0, GLfloat density=1000.0, GLfloat viscosity=0.0, GLuint nbSamplesX=10, GLuint nbSamplesY=10, GLuint nbSamplesZ=1, GLuint nbParticlesCoef=1, GLuint defaultShaderID=1, GLuint spriteShaderID=1, bool solidWalls=true)
 {
@@ -183,8 +211,17 @@ void Simulation::initSimulation()
     // Inits the samples positions and colors
     this->initSamples();
     
+    //---------------LOAD PPM--------------------
+    GLuint height;
+    GLuint width;
+    unsigned char *	image_ppm = loadPPM("../ppm/image2.ppm", &height, &width);
+	
+	//-------Get informations from ppm ----------
+    this->threeColorImageHandler(image_ppm);
+    
     // Inits the cell borders velocity components
     this->initVelocitiesBorders();
+    
 }
 
 

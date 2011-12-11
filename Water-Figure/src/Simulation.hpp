@@ -144,6 +144,8 @@ class Simulation
 		void MICPreconditioner(double * Adiag, double * Aright, double * Atop, Eigen::VectorXd* precon);
 		void applyPreconditioner(double * Aright, double * Atop, Eigen::VectorXd precon, Eigen::VectorXd r, Eigen::VectorXd * z);
 		   
+		void threeColorImageHandler(unsigned char *image);
+		   
         void update();
         
         void render();

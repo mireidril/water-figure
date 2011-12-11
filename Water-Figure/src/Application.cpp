@@ -20,7 +20,6 @@ Application::Application()
     this->init();
 }
 
-
 // Cleans before the application can be closed
 Application::~Application()
 {
@@ -575,7 +574,36 @@ void Application::renderFrame()
         this->frameDuration=(time-this->lastStartTime)/20LL;
         this->lastStartTime=time;
     }
-    
+        if(this->cntFrame <= 10){
+        GLuint width;
+        GLuint height;
+        unsigned char * image_ppm = loadPPM("../ppm/image1.ppm", &width, &height);
+        this->simulation->threeColorImageHandler(image_ppm);
+    }
+    else if(this->cntFrame > 10 && this->cntFrame <= 20){
+        GLuint width;
+        GLuint height;
+        unsigned char * image_ppm  = loadPPM("../images/image2.ppm", &width, &height);
+        this->simulation->threeColorImageHandler(image_ppm);
+    }
+        else if(this->cntFrame > 20 && this->cntFrame <= 30){
+			GLuint width;
+			GLuint height;
+			unsigned char * image_ppm  = loadPPM("../images/image3.ppm", &width, &height);
+			this->simulation->threeColorImageHandler(image_ppm);
+    }
+        else if(this->cntFrame > 30 && this->cntFrame <= 40){
+			GLuint width;
+			GLuint height;
+			unsigned char * image_ppm  = loadPPM("../images/image4.ppm", &width, &height);
+			this->simulation->threeColorImageHandler(image_ppm);
+    }
+		else{
+			GLuint width;
+			GLuint height;
+			unsigned char * image_ppm  = loadPPM("../images/image5.ppm", &width, &height);
+			this->simulation->threeColorImageHandler(image_ppm);
+	}
     // Reports any possible glError
     //std::cout<<"renderFrame error"<<std::endl;
     printGlErrors();
