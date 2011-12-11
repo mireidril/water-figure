@@ -13,32 +13,110 @@
 #include <math.h>
 
 
+
 //-------------------------------------
 //--------PPM interpretation-----------
 //-------------------------------------
-/*Types (0 : cell is fluid, 1 : cell is empty, 2 : cell is solid)*/
+///Types : 	black : solid
+///			white : air
+///			color : fluid of this color
 
 void Simulation::threeColorImageHandler(unsigned char *image)
 {
-
-    for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
-      {
-        for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
-        {
+	std::cout<<"threeColorImageHandler nbSamplesX:"<<nbSamplesX<<" nbSamplesY"<<nbSamplesY<<std::endl;
+	for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
+	{
+		for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
+		{
             GLuint iSample = (iY*(nbSamplesX)+ iX);
             GLuint iImage = (iY*(nbSamplesX)+ iX)*3;
             if((image[iImage] == 0)&& (image[iImage+1] == 0) && (image[iImage+2] == 0) ){
                 types[iSample] = SOLID;
+                //std::cout<<"SOLID";
             }
-            else if((image[iImage] == 1)&& (image[iImage+1] == 1) && (image[iImage+2] == 1) ){
-                types[iSample] = 1;
+            else if((image[iImage] == 255)&& (image[iImage+1] == 255) && (image[iImage+2] == 255) ){
+                types[iSample] = AIR;
+                //std::cout<<"AIR";
             }
             else {
                 types[iSample] = FLUID;
-
+                colors[iSample*4+0]= int(image[iImage]);
+                colors[iSample*4+1]= int(image[iImage+1]);
+                colors[iSample*4+2]= int(image[iImage+2]);
+                colors[iSample*4+3]=1.0f;
+				//std::cout<<"FLUID "<<int(image[iImage])<<"  ,  "<<int(image[iImage+1])<<"  ,  "<<int(image[iImage+2])<<std::endl; 
+				//TODO this actually init the CELL's COLOR. 
+				//To colorate the particles, use interpolateFromCenters(colors, &(particles[iParticles*4+0]), &(particleColors[iParticles*4+0])); as in initParticles()
             }
+            //std::cout<<"  X:"<<iX<<" Y:"<<iY<<" iSample: "<<iSample<<"  iImage :"<<iImage<<std::endl;
         }
     }
+}
+
+//-------------------------------------
+//--------XML interpretation-----------
+//-------------------------------------
+// load the named file and parse it
+void Simulation::loadForcesFrom(const char* pFilename)
+{
+	TiXmlDocument doc(pFilename);
+	bool loadOkay = doc.LoadFile();
+	if (loadOkay)
+	{
+		printf("\n%s:\n", pFilename);
+		parse( &doc, 0 );
+	}
+	else
+	{
+		printf("Failed to load file \"%s\"\n", pFilename);
+	}
+}
+
+//Parse : for each force, parse the attributes, then call applyForcesLoaded.
+void Simulation::parse( TiXmlNode* pParent, unsigned int indent = 0 )
+{
+	if ( !pParent ) return;
+	
+	TiXmlElement* child = pParent->FirstChild( "forces" )->FirstChild( "force" )->ToElement();
+	if( child )
+		for( ; child; child=child->NextSiblingElement() )
+		{
+			int x, y , x2, y2;
+			double valueX, valueY;
+			child->QueryIntAttribute("x", &x);
+			child->QueryIntAttribute("y", &y);
+			child->QueryIntAttribute("x2", &x2);
+			child->QueryIntAttribute("y2", &y2);
+			child->QueryDoubleAttribute("valueX", &valueX);
+			child->QueryDoubleAttribute("valueY", &valueY);
+			
+			applyForcesLoaded( x, y, x2, y2, valueX, valueY );
+		}
+	
+}
+
+// Apply the force given.
+// The points (x,y) and (x2,y2) form a rectangle where the force (valueX, valueY) is going to be applied.
+void Simulation::applyForcesLoaded( int x, int y, int x2, int y2, double valueX, double valueY )
+{
+	printf( "applyForcesLoaded %d %d %d %d %f %f\n", x, y, x2, y2, valueX, valueY );
+	
+	if( x > x2 )
+		std::swap( x, x2 );
+	if( y > y2 )
+		std::swap( y, y2 );
+	
+	//In the rectangle
+	for( int iX = x; iX <= x2; ++iX)
+	{
+		for( int iY = y; iY <= y2; ++iY)
+		{
+			GLuint iSample = (iY*(nbSamplesX)+ iX);
+			//std::cout<<"iX : "<<iX<<" \tiY : "<<iY<<" \tindex : "<<index<<std::endl;
+			forces[iSample*4+0]+= valueX ;
+			forces[iSample*4+1]+= valueY ;
+		}
+	}
 }
 
 // Constructor
@@ -211,17 +289,21 @@ void Simulation::initSimulation()
     // Inits the samples positions and colors
     this->initSamples();
     
+    // Inits the cell borders velocity components
+    this->initVelocitiesBorders();
+    std::cout<<"INIT"<<std::endl;
+    
+    
     //---------------LOAD PPM--------------------
     GLuint height;
     GLuint width;
-    unsigned char *	image_ppm = loadPPM("../ppm/image2.ppm", &height, &width);
-	
-	//-------Get informations from ppm ----------
+    unsigned char *	image_ppm = loadPPM("../ppm/image1.ppm", &height, &width);
+    
+    //-------Get informations from ppm ----------
     this->threeColorImageHandler(image_ppm);
     
-    // Inits the cell borders velocity components
-    this->initVelocitiesBorders();
-    
+    //----------Get forces from XML -------------
+    this->loadForcesFrom("../xml/forces1.xml");
 }
 
 
@@ -248,10 +330,13 @@ void Simulation::initSamples()
 	            else         samples[index*4+2]=this->offset[2]+this->offsetInCell+iZ*this->h;
 	            samples[index*4+3]=1.0f;
 	            
+	            
 	            colors[index*4+0]=0.0f;
 	            colors[index*4+1]=0.0f;
 	            colors[index*4+2]=0.0f;
 	            colors[index*4+3]=1.0f;
+	            
+	            
 	            // Right : red
 	            if (samples[index*4+0]>0.0f) colors[index*4+0]=1.0f;
 	            // Top : Green
@@ -259,30 +344,45 @@ void Simulation::initSamples()
 	            // Bottom-left : blue / Top-right : white
 	            if ((int(colors[index*4+0]+colors[index*4+1])%2)==0)
 	                colors[index*4+2]=1.0f;
+				
 
 				// Forces
 	            forces[index*4+0]=0.0f;
-				forces[index*4+1]=-2.0f;
+				forces[index*4+1]=0.0f;//-2.0f;
 				forces[index*4+2]=0.0f;
 				forces[index*4+3]=0.0f;
 				
-				//if (iX>=(nbSamplesX/2) && iX<= ((nbSamplesX/2) + 2) )
-				//	forces[index*4+1]=10.0f;
+				// Pour l'image1.ppm ! Forces qui poussent vers l'arbre.
+				/*
+				if (iX>=0 && iX<= 58)
+					forces[index*4+0]=4.0f;
 					
-				//if (iX % ((nbSamplesX)/4) == 0 )
-				//	forces[index*4+1]=-0.1f;
-
+				if (iX>=64 && iX<= 120)
+					forces[index*4+0]=-4.0f;
+					
+				if (iX>=58 && iX<= 64)
+					forces[index*4+1]=4.0f;
+				*/
+				/*
+				if (iX>=(nbSamplesX/2) && iX<= ((nbSamplesX/2) + 2) )
+					forces[index*4+1]=10.0f;
+					
+				if (iX % ((nbSamplesX)/4) == 0 )
+					forces[index*4+1]=-0.1f;
+				*/
 				// Pressures
 				pressures[index]=1.0;
 
 				// Types
+				
 				types[index] = AIR;
+				/*
 				//if(iY <= (nbSamplesY/2 + 5) && iY >= (nbSamplesY/2) && iX >= (nbSamplesX/2 +1) && iX <= (3*nbSamplesX/4 + 3))
 				
 				if(iX >= (nbSamplesX/2) && iY >= (nbSamplesY/2))
 				{
 					types[index]=FLUID;
-				}
+				}*/
 	        }
 	    }
 	}
@@ -399,13 +499,15 @@ void Simulation::initParticles()
             if (iCoord==3) particleColors[iParticles*4+iCoord]=1.0;
             particleVelocities[iParticles*4+iCoord]=0.0;
         }
-        //interpolateFromCenters(colors, &(particles[iParticles*4+0]), &(particleColors[iParticles*4+0]));
+        interpolateFromCenters(colors, &(particles[iParticles*4+0]), &(particleColors[iParticles*4+0]));
         
+        /*
+        // Couleurs de Nadine : blanc jaune rouge
         particleColors[iParticles*4+0] = 1.0;
         particleColors[iParticles*4+3] = 1.0;
         if(iParticles < 2 * nbParticles/3) particleColors[iParticles*4+1] = 1.0;
         if(iParticles < 1 * nbParticles/3) particleColors[iParticles*4+2] = 1.0;
-        
+        */
         interpolateFromBorders(velocitiesX, velocitiesY, velocitiesZ, &(particles[iParticles*4+0]), &(particleVelocities[iParticles*4+0]));
     }
 }
@@ -1010,7 +1112,7 @@ void Simulation::advectParticles(GLfloat dt)
     if (objectPressures != NULL)
 	{
 		GLfloat * colorsType = new GLfloat[nbSamples * 4];
-		for(int i = 0; i < nbSamples; ++i)
+		for(GLuint i = 0; i < nbSamples; ++i)
 		{
 			if(types[i] == FLUID)
 			{
