@@ -407,14 +407,26 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
 		      		++ ppmPhase;
 					GLuint width;
 					GLuint height;
+					
+					//Get files string (complicated for nothing ...)
 					std::string image_path;
+					std::string xml_string_path;
+					const char * xml_path;
 					std::stringstream out;
+					std::stringstream out2;
 					out<<"../ppm/image"<<ppmPhase<<".ppm";
 					image_path = out.str();
+					out2<<"../xml/forces"<<ppmPhase<<".xml";
+					xml_string_path = out2.str();
+					xml_path = xml_string_path.data();
 					
+					//Load PPM
 					unsigned char * image_ppm = loadPPM(image_path, &width, &height);
 					std::cout<<"Charging "<<image_path<<std::endl;
 					this->simulation->threeColorImageHandler(image_ppm);
+					
+					//Load forces from XML
+					this->simulation->loadForcesFrom(xml_path);
 				}
 			break;
           	

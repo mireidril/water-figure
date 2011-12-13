@@ -151,6 +151,8 @@ class Simulation
 		void parse( TiXmlNode* pParent, unsigned int indent);
 		void applyForcesLoaded( int x, int y, int x2, int y2, double valueX, double valueY );
 		
+		void resetForces();
+		
         void update();
         
         void render();
