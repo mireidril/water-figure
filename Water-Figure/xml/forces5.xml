@@ -2,7 +2,7 @@
 <forces>
     <!-- Settings for image1.ppm -->
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
-    <force x="0" y="0" x2="57" y2="19" valueX="1.0" valueY="0.1"/>
-    <force x="65" y="0" x2="119" y2="19" valueX="-1.0" valueY="0.1"/>
-    <force x="58" y="19" x2="70" y2="36" valueX="0.0" valueY="2.0"/>
+    <force x="48" y="0" x2="77" y2="15" valueX="0.0" valueY="10.0"/>
+    <force x="0" y="0" x2="47" y2="10" valueX="0.0" valueY="1.0"/>
+    <force x="78" y="0" x2="119" y2="10" valueX="0.0" valueY="1.0"/>
 </forces>

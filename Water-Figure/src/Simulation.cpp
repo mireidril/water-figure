@@ -1854,12 +1854,11 @@ void Simulation::buildForces(Object * object)
 
 void Simulation::drawForces()
 {
-	Object * objectForces = new Object(GL_LINES);
+	objectForces = new Object(GL_LINES);
 	GLuint storedObjectForces=scene->storeObject(objectForces);
 	this->buildForces(objectForces);
 	GLuint forcesID=scene->addObjectToDraw(storedObjectForces);
 	scene->setDrawnObjectShaderID(forcesID, defaultShaderID);
-
 }
 
 // Builds an object to visualize the types

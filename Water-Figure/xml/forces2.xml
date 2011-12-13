@@ -3,4 +3,5 @@
     <!-- Settings for image1.ppm -->
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
     <force x="0" y="0" x2="119" y2="119" valueX="0.0" valueY="-2.0"/>
+    <!--<force x="0" y="0" x2="0" y2="0" valueX="0.0" valueY="-2.0"/>-->
 </forces>

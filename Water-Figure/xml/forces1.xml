@@ -2,7 +2,17 @@
 <forces>
     <!-- Settings for image1.ppm -->
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
+    
+    <!--Forces to regroup particles to the center -->
     <force x="0" y="0" x2="57" y2="19" valueX="1.0" valueY="0.1"/>
     <force x="65" y="0" x2="119" y2="19" valueX="-1.0" valueY="0.1"/>
-    <force x="58" y="19" x2="70" y2="36" valueX="0.0" valueY="2.0"/>
+    <!--Force push particles to the top -->
+    <force x="59" y="19" x2="63" y2="30" valueX="0.3" valueY="1.0"/>
+    <force x="70" y="45" x2="75" y2="60" valueX="0.1" valueY="1.0"/>
+    <force x="67" y="70" x2="72" y2="75" valueX="-0.3" valueY="-0.4"/>
+    <force x="53" y="87" x2="57" y2="89" valueX="-0.8" valueY="0.0"/>
+    <!--Forces to push a particles group to each branch -->
+    <force x="59" y="49" x2="63" y2="49" valueX="-0.5" valueY="0.0"/>
+    <force x="60" y="52" x2="64" y2="52" valueX="-0.5" valueY="0.2"/>
+    
 </forces>

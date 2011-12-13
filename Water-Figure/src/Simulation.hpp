@@ -80,8 +80,7 @@ class Simulation
         Object * objectParticles;  // For rendering particles (position/color checking)
         Object * objectParticleVelocities; // For rendering particles interpolated velocities
 		Object * objectPressures; //For rendering pressures (pressure checking)
-        
-        
+		Object * objectForces; //For rendering pressures (pressure checking)
         
         Simulation(Scene * scene, bool surface, GLfloat size, GLfloat density, GLfloat viscosity, GLuint nbSamplesX, GLuint nbSamplesY, GLuint nbSamplesZ, GLuint nbParticlesCoef, GLuint defaultShaderID, GLuint spriteShaderID, bool solidWalls);
         ~Simulation();
