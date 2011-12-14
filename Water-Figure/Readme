@@ -7,6 +7,11 @@ It needs :
  OpenGL3 
  libSDL
 
+* First, compile TinyXML
+ cd ./api/TinyXML
+ make
+ ar rcs libtinyxml.a tinyxmlerror.o tinystr.o tinyxmlparser.o tinyxml.o
+
 * Compile Fluids :
  cd ./src
  make

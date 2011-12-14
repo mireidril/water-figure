@@ -17,7 +17,7 @@
 // Default constructor
 Application::Application()
 {
-	bStoreFrame = false;
+	bStoreFrame = true;
     this->init();
 }
 
@@ -70,7 +70,7 @@ void Application::init()
 
 	this->scroll=0;
 	
-	this->ppmPhase=1;
+	this->ppmPhase=6;
 	
 	// Initialisation of SDL and creation of OpenGL context
     initSDLOpenGL();
@@ -409,7 +409,7 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
           	
           	case SDLK_o :
           		std::cout<<"Key \"o\" was pressed."<<std::endl;
-		      	if(ppmPhase < 5){
+		      	if(ppmPhase < 7){
 		      		++ ppmPhase;
 					GLuint width;
 					GLuint height;
@@ -601,8 +601,8 @@ void Application::renderFrame()
 	if (this->scene!=NULL)
     	this->scene->drawObjectsOfScene();
     
-    //if(bStoreFrame)	
-   	// this->storeFrame();
+    if(bStoreFrame)	
+		this->storeFrame();
     
     // Performs the buffer swap between the current shown buffer, 
     // and the one we just worked on

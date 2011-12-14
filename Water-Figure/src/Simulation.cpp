@@ -40,13 +40,12 @@ void Simulation::threeColorImageHandler(unsigned char *image)
             }
             else {
                 types[iSample] = FLUID;
-                colors[iSample*4+0]= int(image[iImage]);
-                colors[iSample*4+1]= int(image[iImage+1]);
-                colors[iSample*4+2]= int(image[iImage+2]);
+                // this init the CELL's COLOR. 
+                colors[iSample*4+0]= float(image[iImage])/255;
+                colors[iSample*4+1]= float(image[iImage+1])/255;
+                colors[iSample*4+2]= float(image[iImage+2])/255;
                 colors[iSample*4+3]=1.0f;
-				//std::cout<<"FLUID "<<int(image[iImage])<<"  ,  "<<int(image[iImage+1])<<"  ,  "<<int(image[iImage+2])<<std::endl; 
-				//TODO this actually init the CELL's COLOR. 
-				//To colorate the particles, use interpolateFromCenters(colors, &(particles[iParticles*4+0]), &(particleColors[iParticles*4+0])); as in initParticles()
+				//std::cout<<"FLUID "<<colors[iSample*4+0]<<"  ,  "<<colors[iSample*4+1]<<"  ,  "<<colors[iSample*4+2]<<std::endl; 
             }
             //std::cout<<"  X:"<<iX<<" Y:"<<iY<<" iSample: "<<iSample<<"  iImage :"<<iImage<<std::endl;
         }
@@ -314,13 +313,13 @@ void Simulation::initSimulation()
     //---------------LOAD PPM--------------------
     GLuint height;
     GLuint width;
-    unsigned char *	image_ppm = loadPPM("../ppm/image1.ppm", &height, &width);
+    unsigned char *	image_ppm = loadPPM("../ppm/image6.ppm", &height, &width);
     
     //-------Get informations from ppm ----------
     this->threeColorImageHandler(image_ppm);
     
     //----------Get forces from XML -------------
-    this->loadForcesFrom("../xml/forces1.xml");
+    this->loadForcesFrom("../xml/forces6.xml");
 }
 
 
@@ -457,6 +456,7 @@ void Simulation::initVelocitiesBorders()
 // 3D not implemented
 void Simulation::initParticles()
 {
+	std::cout<<"initParticles"<<std::endl;
     //GLuint nb=(GLuint) pow(4.0, (int)nbParticlesCoef);
     GLuint nbAxis=(GLuint)pow(2.0, (int)nbParticlesCoef);  
     
