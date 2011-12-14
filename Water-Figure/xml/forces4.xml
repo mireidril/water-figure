@@ -2,7 +2,21 @@
 <forces>
     <!-- Settings for image1.ppm -->
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
-    <force x="48" y="0" x2="77" y2="15" valueX="0.0" valueY="2.0"/>
-    <force x="0" y="0" x2="47" y2="10" valueX="0.0" valueY="1.0"/>
-    <force x="78" y="0" x2="119" y2="10" valueX="0.0" valueY="1.0"/><!--<force x="0" y="0" x2="0" y2="0" valueX="0.0" valueY="-2.0"/>-->
+    <!-- Trees -->
+    <force x="0" y="0" x2="47" y2="19" valueX="0.0" valueY="3.0"/>
+    <force x="78" y="0" x2="119" y2="19" valueX="0.0" valueY="3.0"/>
+    <!-- Fountain -->
+    <force x="48" y="0" x2="58" y2="19" valueX="0.0" valueY="1.0"/>
+    <force x="59" y="19" x2="67" y2="22" valueX="0.0" valueY="10.0"/>
+    <force x="68" y="0" x2="77" y2="19" valueX="0.0" valueY="1.0"/>
+    <!-- Text -->
+    <force x="32" y="60" x2="65" y2="60" valueX="-10.0" valueY="0.0"/>
+    <force x="31" y="60" x2="31" y2="97" valueX="0.0" valueY="10.0"/>
+    <force x="34" y="98" x2="36" y2="100" valueX="5.0" valueY="7.0"/>
+    <force x="40" y="98" x2="100" y2="98" valueX="10.0" valueY="0.0"/>
+    <force x="102" y="90" x2="105" y2="100" valueX="0.0" valueY="-10.0"/>
+    <force x="45" y="78" x2="90" y2="78" valueX="-10.0" valueY="0.0"/>
+    <!-- Gravity -->
+    <force x="48" y="57" x2="58" y2="62" valueX="-0.1" valueY="-1.0"/>
+    <force x="68" y="57" x2="77" y2="62" valueX="0.1" valueY="-1.0"/>
 </forces>

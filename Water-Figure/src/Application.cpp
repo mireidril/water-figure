@@ -17,6 +17,7 @@
 // Default constructor
 Application::Application()
 {
+	bStoreFrame = false;
     this->init();
 }
 
@@ -401,6 +402,11 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
           		switchMouse();
           	break;
           	
+          	case SDLK_s :
+                std::cout<<"Key \"s\" was pressed."<<std::endl;
+          		bStoreFrame = !bStoreFrame;
+          	break;
+          	
           	case SDLK_o :
           		std::cout<<"Key \"o\" was pressed."<<std::endl;
 		      	if(ppmPhase < 5){
@@ -417,9 +423,9 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
 					out<<"../ppm/image"<<ppmPhase<<".ppm";
 					image_path = out.str();
 					out2<<"../xml/forces"<<ppmPhase<<".xml";
+					
 					xml_string_path = out2.str();
 					xml_path = xml_string_path.data();
-					
 					//Load PPM
 					unsigned char * image_ppm = loadPPM(image_path, &width, &height);
 					std::cout<<"Charging "<<image_path<<std::endl;
@@ -427,6 +433,10 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
 					
 					//Load forces from XML
 					this->simulation->loadForcesFrom(xml_path);
+					if(ppmPhase == 4){
+						//simulation->drawForces();
+						//simulation->drawTypes();
+						}
 				}
 			break;
           	
@@ -590,8 +600,9 @@ void Application::renderFrame()
 	// Draws this->scene
 	if (this->scene!=NULL)
     	this->scene->drawObjectsOfScene();
-    	
-    //this->storeFrame();
+    
+    //if(bStoreFrame)	
+   	// this->storeFrame();
     
     // Performs the buffer swap between the current shown buffer, 
     // and the one we just worked on

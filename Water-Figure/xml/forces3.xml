@@ -4,5 +4,12 @@
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
     <force x="0" y="0" x2="57" y2="17" valueX="1.0" valueY="0.1"/>
     <force x="65" y="0" x2="119" y2="17" valueX="-1.0" valueY="0.1"/>
-    <force x="48" y="19" x2="77" y2="25" valueX="0.0" valueY="2.0"/><!--<force x="0" y="0" x2="0" y2="0" valueX="0.0" valueY="-2.0"/>-->
+    <!-- Fountain -->
+    <force x="48" y="19" x2="77" y2="22" valueX="0.0" valueY="1.0"/>
+    <!-- Gravity -->
+    <force x="0" y="25" x2="47" y2="119" valueX="-0.5" valueY="-1.0"/>
+    <force x="78" y="25" x2="119" y2="119" valueX="+0.5" valueY="-1.0"/>
+    <!-- Wind -->
+    <force x="48" y="25" x2="62" y2="119" valueX="-0.5" valueY="-1.0"/>
+    <force x="63" y="25" x2="77" y2="119" valueX="+0.5" valueY="-1.0"/><!--<force x="0" y="0" x2="0" y2="0" valueX="0.0" valueY="-2.0"/>-->
 </forces>

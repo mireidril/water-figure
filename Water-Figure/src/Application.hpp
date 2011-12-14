@@ -20,6 +20,7 @@ class Application
 {
     public:
     
+    	int	bStoreFrame;
         //int renderEventID;
         int moveEventID;
         int animateEventID;
