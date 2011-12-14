@@ -57,7 +57,6 @@ class Application
         Scene * scene;                          // Scene to draw
         Simulation * simulation;
         GLuint eventCnt;
-        GLuint ppmPhase;						// Which phase of the PPM are we ?
 
         Application();
         ~Application();

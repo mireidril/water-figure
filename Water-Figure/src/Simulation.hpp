@@ -10,6 +10,9 @@
 
 #include <SDL.h>
 
+#include <vector>
+#include <algorithm>
+
 // Mersenne Twister random generation
 #include "../api/random/MersenneTwister.h"
 #include "../api/eigen-eigen-3.0.3/Eigen/Dense"
@@ -26,6 +29,8 @@ class Object;
 class Simulation
 {
      public:
+        GLuint ppmPhase;						// Which phase of the PPM are we ?
+     
         // About the data stored on centers of the MAC grid
         GLuint nbSamplesX;       // Samples number on X axis
         GLuint nbSamplesY;       // Samples number on Y axis
@@ -85,7 +90,7 @@ class Simulation
         Simulation(Scene * scene, bool surface, GLfloat size, GLfloat density, GLfloat viscosity, GLuint nbSamplesX, GLuint nbSamplesY, GLuint nbSamplesZ, GLuint nbParticlesCoef, GLuint defaultShaderID, GLuint spriteShaderID, bool solidWalls);
         ~Simulation();
 
-	void getCell(GLfloat * pos, int * iX, int * iY, int * iZ);
+		void getCell(GLfloat * pos, int * iX, int * iY, int * iZ);
 
         void initSimulation();
         void initVisualization();
@@ -109,6 +114,7 @@ class Simulation
         void drawVelocitiesCenters();
         
         void initParticles();
+        //void addParticles(GLuint & iSample);
         void buildParticles(Object * object);
         void drawParticles();
         
@@ -145,6 +151,9 @@ class Simulation
 		void applyPreconditioner(double * Aright, double * Atop, Eigen::VectorXd precon, Eigen::VectorXd r, Eigen::VectorXd * z);
 		   
 		void threeColorImageHandler(unsigned char *image);
+		//All the samples which are initially FLUID
+		//std::vector<GLuint> infiniteFluidsCase;
+		//void isFluidCaseEmpty();
 		
 		void loadForcesFrom(const char* pFilename);
 		void parse( TiXmlNode* pParent, unsigned int indent);

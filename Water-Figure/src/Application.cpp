@@ -17,7 +17,7 @@
 // Default constructor
 Application::Application()
 {
-	bStoreFrame = true;
+	bStoreFrame = false;
     this->init();
 }
 
@@ -69,8 +69,6 @@ void Application::init()
 	this->yMouseLeftDownPosition=0.0;
 
 	this->scroll=0;
-	
-	this->ppmPhase=6;
 	
 	// Initialisation of SDL and creation of OpenGL context
     initSDLOpenGL();
@@ -409,8 +407,10 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
           	
           	case SDLK_o :
           		std::cout<<"Key \"o\" was pressed."<<std::endl;
-		      	if(ppmPhase < 7){
-		      		++ ppmPhase;
+          		//the real story is on the first 5 ppm
+          		//the 6 and the 7 are using for the rendering of our video
+		      	if(simulation->ppmPhase < 7){
+		      		++ simulation->ppmPhase;
 					GLuint width;
 					GLuint height;
 					
@@ -420,9 +420,9 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
 					const char * xml_path;
 					std::stringstream out;
 					std::stringstream out2;
-					out<<"../ppm/image"<<ppmPhase<<".ppm";
+					out<<"../ppm/image"<<simulation->ppmPhase<<".ppm";
 					image_path = out.str();
-					out2<<"../xml/forces"<<ppmPhase<<".xml";
+					out2<<"../xml/forces"<<simulation->ppmPhase<<".xml";
 					
 					xml_string_path = out2.str();
 					xml_path = xml_string_path.data();
@@ -433,10 +433,13 @@ void Application::handleKeyEvent(SDL_keysym& keysym, bool down)
 					
 					//Load forces from XML
 					this->simulation->loadForcesFrom(xml_path);
-					if(ppmPhase == 4){
-						//simulation->drawForces();
-						//simulation->drawTypes();
-						}
+					
+					//Testing
+					/*if(simulation->ppmPhase == 4)
+					{
+						simulation->drawForces();
+						simulation->drawTypes();
+					}*/
 				}
 			break;
           	

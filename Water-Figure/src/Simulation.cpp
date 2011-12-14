@@ -23,7 +23,7 @@
 
 void Simulation::threeColorImageHandler(unsigned char *image)
 {
-	std::cout<<"threeColorImageHandler nbSamplesX:"<<nbSamplesX<<" nbSamplesY"<<nbSamplesY<<std::endl;
+	std::cout<<"threeColorImageHandler nbSamplesX:"<<nbSamplesX<<" nbSamplesY"<<nbSamplesY<<std::endl;	
 	for (GLuint iY=0 ; iY<nbSamplesY ; iY++)
 	{
 		for (GLuint iX=0 ; iX<nbSamplesX ; iX++)
@@ -46,11 +46,31 @@ void Simulation::threeColorImageHandler(unsigned char *image)
                 colors[iSample*4+2]= float(image[iImage+2])/255;
                 colors[iSample*4+3]=1.0f;
 				//std::cout<<"FLUID "<<colors[iSample*4+0]<<"  ,  "<<colors[iSample*4+1]<<"  ,  "<<colors[iSample*4+2]<<std::endl; 
+				//Si on en est au 4eme PPM -> generation infinie de particules => doesn't work
+				/*if(ppmPhase == 4)
+				{
+					infiniteFluidsCase.push_back(iSample);
+				}*/
             }
             //std::cout<<"  X:"<<iX<<" Y:"<<iY<<" iSample: "<<iSample<<"  iImage :"<<iImage<<std::endl;
         }
     }
 }
+
+//Test all the samples which are initially FLUID. If not, add particles in that sample.
+/*void Simulation::isFluidCaseEmpty()
+{
+	for(int i = 0; i < infiniteFluidsCase.size(); ++i)
+	{
+		GLuint iSample = infiniteFluidsCase[i];
+		if(types[iSample] == AIR)
+		{
+			addParticles(iSample);
+			std::cout<<"Particle Add"<<std::endl;
+			infiniteFluidsCase.erase(infiniteFluidsCase.begin() + i);
+		}
+	}
+}*/
 
 //-------------------------------------
 //--------XML interpretation-----------
@@ -137,6 +157,7 @@ void Simulation::resetForces()
 
 // Constructor
 Simulation::Simulation(Scene * scene, bool surface=true, GLfloat size=2.0, GLfloat density=1000.0, GLfloat viscosity=0.0, GLuint nbSamplesX=10, GLuint nbSamplesY=10, GLuint nbSamplesZ=1, GLuint nbParticlesCoef=1, GLuint defaultShaderID=1, GLuint spriteShaderID=1, bool solidWalls=true)
+:ppmPhase(1)
 {
     // About the data stored on centers of the MAC grid
     
@@ -313,13 +334,19 @@ void Simulation::initSimulation()
     //---------------LOAD PPM--------------------
     GLuint height;
     GLuint width;
-    unsigned char *	image_ppm = loadPPM("../ppm/image6.ppm", &height, &width);
+    std::string ppm_path("../ppm/image");
+    ppm_path += ppmPhase;
+    ppm_path += ".ppm";
+    std::string xml_path("../xml/forces");
+    xml_path += ppmPhase;
+    xml_path += ".xml";
+    unsigned char *	image_ppm = loadPPM("../ppm/image1.ppm", &height, &width);
     
     //-------Get informations from ppm ----------
     this->threeColorImageHandler(image_ppm);
     
     //----------Get forces from XML -------------
-    this->loadForcesFrom("../xml/forces6.xml");
+    this->loadForcesFrom("../xml/forces1.xml");
 }
 
 
@@ -368,37 +395,13 @@ void Simulation::initSamples()
 				forces[index*4+2]=0.0f;
 				forces[index*4+3]=0.0f;
 				
-				// Pour l'image1.ppm ! Forces qui poussent vers l'arbre.
-				/*
-				if (iX>=0 && iX<= 58)
-					forces[index*4+0]=4.0f;
-					
-				if (iX>=64 && iX<= 120)
-					forces[index*4+0]=-4.0f;
-					
-				if (iX>=58 && iX<= 64)
-					forces[index*4+1]=4.0f;
-				*/
-				/*
-				if (iX>=(nbSamplesX/2) && iX<= ((nbSamplesX/2) + 2) )
-					forces[index*4+1]=10.0f;
-					
-				if (iX % ((nbSamplesX)/4) == 0 )
-					forces[index*4+1]=-0.1f;
-				*/
+		
 				// Pressures
 				pressures[index]=1.0;
 
 				// Types
 				
 				types[index] = AIR;
-				/*
-				//if(iY <= (nbSamplesY/2 + 5) && iY >= (nbSamplesY/2) && iX >= (nbSamplesX/2 +1) && iX <= (3*nbSamplesX/4 + 3))
-				
-				if(iX >= (nbSamplesX/2) && iY >= (nbSamplesY/2))
-				{
-					types[index]=FLUID;
-				}*/
 	        }
 	    }
 	}
@@ -528,6 +531,69 @@ void Simulation::initParticles()
         interpolateFromBorders(velocitiesX, velocitiesY, velocitiesZ, &(particles[iParticles*4+0]), &(particleVelocities[iParticles*4+0]));
     }
 }
+
+//Add particles in a sample -> doesn't work
+/*void Simulation::addParticles(GLuint & iSample)
+{
+	std::cout<<"addParticles"<<std::endl;
+    GLuint nbAxis=(GLuint)pow(2.0, (int)nbParticlesCoef);  
+    GLfloat halfCell=h/2.0f;
+    GLfloat step=h/float(nbAxis);
+    GLfloat sideOffsetX=h/(4.0f*nbAxis);
+    
+    GLuint newNbParticles=this->nbParticles + nbAxis*nbAxis + 1;
+    
+	GLuint iParticle = this->nbParticles;
+	GLfloat * particlesTmp = new GLfloat[newNbParticles*4];
+	GLfloat * particlesColorsTmp = new GLfloat[newNbParticles*4];
+	GLfloat * particlesVelocitiesTmp = new GLfloat[newNbParticles*4*2];
+	
+	delete [] particles;
+	delete [] particleColors;
+	delete [] particleVelocities;
+	
+	particles = std::copy(particles, particles + ( this->nbParticles*4), particlesTmp);
+	particleColors = std::copy(particleColors, particleColors +  ( this->nbParticles*4), particlesColorsTmp);
+	particlesVelocitiesTmp = std::copy(particleVelocities, particleVelocities +  (this->nbParticles*4*2), particlesVelocitiesTmp);
+	std::cout<<"XD1"<<std::endl;
+	
+	for (GLuint iY=0 ; iY<nbAxis ; iY++)
+	{
+		GLfloat offsetY=-halfCell + step/2.0 + iY*step;
+		for (GLuint iX=0 ; iX<nbAxis ; iX++)
+		{
+			GLfloat offsetX=-halfCell + sideOffsetX + iX*step;
+			if (iY%2==1) offsetX+=step/2.0;
+			particles[iParticle*4+0]=samples[iSample*4+0]+offsetX;
+			particles[iParticle*4+1]=samples[iSample*4+1]+offsetY;
+			particles[iParticle*4+2]=samples[iSample*4+2];
+			particles[iParticle*4+3]=samples[iSample*4+3];
+			iParticle++;
+		}
+	}
+	std::cout<<"iParticle : "<<iParticle<<" and newNbParticles : "<<newNbParticles<<std::endl;	
+	for (GLuint iParticles=this->nbParticles ; iParticles < newNbParticles ; iParticles++)
+	{
+	    // Moves particles randomly and at close range around initial position
+	    GLfloat radius= (float)getRand(*(this->rand), true, 0.0, 2.0*sideOffsetX);
+	    GLfloat angle=(float)getRand(*(this->rand), true, 0.0, 2.0*M_PI);
+	    particles[iParticles*4+0]+=radius*cos(angle);
+	    particles[iParticles*4+1]+=radius*sin(angle);
+
+        // Interpolates color and velocity bilinearly for each particle
+        for (GLuint iCoord=0 ; iCoord<4 ; iCoord++)
+        {
+            particleColors[iParticles*4+iCoord]=0.0;
+            if (iCoord==3) particleColors[iParticles*4+iCoord]=1.0;
+            particleVelocities[iParticles*4+iCoord]=0.0;
+        }
+        interpolateFromCenters(colors, &(particles[iParticles*4+0]), &(particleColors[iParticles*4+0]));
+        
+        interpolateFromBorders(velocitiesX, velocitiesY, velocitiesZ, &(particles[iParticles*4+0]), &(particleVelocities[iParticles*4+0]));
+    }
+    
+    this->nbParticles = newNbParticles;
+}*/
 
 
 // Builds an object to visualize the grid (borders of cells as lines)
@@ -1954,6 +2020,11 @@ void Simulation::update()
 	this->applyForces(dt);
 	// Velocities are uptated to satisfy incompressiblity and limit conditons
 	this->project(dt);
+	
+	if(ppmPhase == 4)
+	{
+		//isFluidCaseEmpty();
+	}
 
 
 }

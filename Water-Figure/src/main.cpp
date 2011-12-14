@@ -106,7 +106,7 @@ int main(int argc, char **argv)
     bool surface=true;
     //bool surface=false;     
     GLfloat size=2.0;					//largeur de la grille dans l'espace
-    float density=20.0;//20
+    float density=20.0;
     float viscosity=0.0;
     GLuint nbSamplesOneDir=80; 
     //GLuint nbSamplesX=nbSamplesOneDir; 
