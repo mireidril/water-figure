@@ -4,6 +4,6 @@
     <!-- y = 0 is the base of the tree, meaning the image is reversed, like in the ppm.-->
     <force x="0" y="0" x2="119" y2="119" valueX="0.0" valueY="-2.0"/>
     <!-- Trees -->
-    <force x="0" y="0" x2="36" y2="21" valueX="0.2" valueY="4.0"/>
-    <force x="85" y="0" x2="119" y2="21" valueX="-0.2" valueY="4.0"/>
+    <force x="0" y="0" x2="36" y2="21" valueX="0.2" valueY="10.0"/>
+    <force x="85" y="0" x2="119" y2="21" valueX="-0.2" valueY="10.0"/>
 </forces>
