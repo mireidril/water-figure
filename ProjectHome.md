@@ -1,0 +1,1 @@
+An IMAC engineer school 3nd year project by Sanaa Belkouch, Céline Cogny and Stéphanie Luu.
